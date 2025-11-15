@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import './App.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://feedback-dashboard-nvy6.onrender.com';
+const API_URL = 'https://feedback-dashboard-nvy6.onrender.com';
 
 function App() {
   const [feedbacks, setFeedbacks] = useState([]);
@@ -21,8 +20,9 @@ function App() {
 
   const fetchFeedbacks = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/feedback`);
-      setFeedbacks(response.data);
+      const response = await fetch(`${API_URL}/api/feedback`);
+      const data = await response.json();
+      setFeedbacks(data);
     } catch (error) {
       console.error('Error fetching feedbacks:', error);
     }
@@ -30,8 +30,9 @@ function App() {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/stats`);
-      setStats(response.data);
+      const response = await fetch(`${API_URL}/api/stats`);
+      const data = await response.json();
+      setStats(data);
     } catch (error) {
       console.error('Error fetching stats:', error);
     }
@@ -40,13 +41,25 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/api/feedback`, formData);
-      setFormData({ name: '', email: '', message: '', rating: 5 });
-      fetchFeedbacks();
-      fetchStats();
-      alert('Feedback submitted successfully!');
+      const response = await fetch(`${API_URL}/api/feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      if (response.ok) {
+        setFormData({ name: '', email: '', message: '', rating: 5 });
+        fetchFeedbacks();
+        fetchStats();
+        alert('Feedback submitted successfully!');
+      } else {
+        const error = await response.json();
+        alert('Error: ' + error.error);
+      }
     } catch (error) {
-      alert('Error submitting feedback: ' + (error.response?.data?.error || 'Unknown error'));
+      alert('Error submitting feedback');
     }
   };
 
