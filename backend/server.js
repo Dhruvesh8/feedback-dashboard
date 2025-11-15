@@ -8,8 +8,16 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://feedback-dashboard-nvy6.onrender.com', /\.vercel\.app$/],
+  credentials: true
+}));
 app.use(bodyParser.json());
+
+// Health check endpoint
+app.get('/', (req, res) => {
+  res.json({ message: 'Feedback Dashboard API is running!' });
+});
 
 // Database setup
 const dbPath = path.join(__dirname, 'feedback.db');
